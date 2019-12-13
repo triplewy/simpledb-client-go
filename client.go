@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"path/filepath"
 	"time"
 
 	pb "github.com/triplewy/simpledb/grpc"
@@ -9,19 +10,22 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Client consists of client config and rpc client
 type Client struct {
+	Config *Config
 	client pb.SimpleDbClient
 }
 
-func NewClient(addr string) *Client {
-	c := connect(addr)
-	return &Client{
-		client: c,
-	}
+// NewClient creates a new client to db
+func NewClient(config *Config) *Client {
+	c := new(Client)
+	c.Config = config
+	c.connect()
+	return c
 }
 
-func connect(addr string) pb.SimpleDbClient {
-	creds, err := credentials.NewClientTLSFromFile("ssl/cert.pem", "")
+func (c *Client) connect() {
+	creds, err := credentials.NewClientTLSFromFile(filepath.Join(c.Config.sslDir, "cert.pem"), "")
 	if err != nil {
 		log.Fatalf("could not create credentials: %v", err)
 	}
@@ -29,5 +33,5 @@ func connect(addr string) pb.SimpleDbClient {
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	return pb.NewSimpleDbClient(conn)
+	c.client = pb.NewSimpleDbClient(conn)
 }

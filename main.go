@@ -4,20 +4,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
 	"gopkg.in/abiosoft/ishell.v1"
 )
 
 var addr string
+var sslDir string
 
 func init() {
-	flag.StringVar(&addr, "c", "", "Set join address, if any")
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] <node-address> \n", os.Args[0])
-		flag.PrintDefaults()
-	}
+	flag.StringVar(&addr, "c", "localhost:30000", "connect address")
+	flag.StringVar(&sslDir, "ssl", "", "ssl directory")
 }
 
 func printHelp(shell *ishell.Shell) {
@@ -33,7 +30,7 @@ func printHelp(shell *ishell.Shell) {
 
 func main() {
 	flag.Parse()
-	client := NewClient(addr)
+	client := NewClient(&Config{addr: addr, sslDir: sslDir})
 	shell := ishell.New()
 	printHelp(shell)
 
